@@ -13,12 +13,10 @@ def generate_response(user_id, message):
     state = sessions[user_id]
     message = message.lower()
 
-    # EXIT
     if message in ["no", "exit"]:
         sessions[user_id] = {"step": "start"}
         return {"text": "👍 Have a great day! See you again."}
 
-    # STEP 1
     if state["step"] == "start":
         state["step"] = "service"
         return {
@@ -26,7 +24,6 @@ def generate_response(user_id, message):
             "options": ["Machine Bowling", "Turf Booking"]
         }
 
-    # STEP 2
     if state["step"] == "service":
         state["service"] = message
         state["step"] = "duration"
@@ -35,7 +32,6 @@ def generate_response(user_id, message):
             "options": ["1 hour", "2 hours"]
         }
 
-    # STEP 3 (PRICE)
     if state["step"] == "duration":
         state["duration"] = message
 
@@ -52,7 +48,6 @@ def generate_response(user_id, message):
             "options": ["Confirm", "Cancel"]
         }
 
-    # STEP 4
     if state["step"] == "confirm":
         if message == "confirm":
             state["step"] = "mobile"
@@ -65,7 +60,6 @@ def generate_response(user_id, message):
                 "options": ["Machine Bowling", "Turf Booking"]
             }
 
-    # STEP 5
     if state["step"] == "mobile":
         state["mobile"] = message
         state["step"] = "payment_method"
@@ -74,7 +68,6 @@ def generate_response(user_id, message):
             "options": ["Card", "PhonePe", "Paytm", "GPay", "Razorpay"]
         }
 
-    # STEP 6
     if state["step"] == "payment_method":
         state["payment"] = message
         state["step"] = "qr"
@@ -84,7 +77,6 @@ def generate_response(user_id, message):
             "options": ["Payment Done"]
         }
 
-    # STEP 7
     if state["step"] == "qr":
         state["step"] = "done"
 
@@ -107,7 +99,6 @@ Status: Confirmed
             "download": "/receipt"
         }
 
-    # STEP 8
     if state["step"] == "done":
         state["step"] = "restart"
         return {
@@ -115,7 +106,6 @@ Status: Confirmed
             "options": ["Yes", "No"]
         }
 
-    # STEP 9
     if state["step"] == "restart":
         if message == "yes":
             state["step"] = "start"
