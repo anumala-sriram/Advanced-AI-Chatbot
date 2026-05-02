@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Booking Assistant</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+
+.header {
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 20px;
+}
+
+.chat {
+    height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.message {
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.user {
+    background: #22c55e;
+    color: white;
+}
+
+.bot {
+    background: #334155;
+    color: white;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+}
+
+.input-box {
+    display: flex;
+    padding: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">🤖 AI Booking Assistant</div>
+
+<div id="chat" class="chat"></div>
+
+<div class="input-box">
+<input id="msg" placeholder="Type message...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+
+function addMessage(text, type) {
+    let div = document.createElement("div");
+    div.className = "message " + type;
+    div.innerText = text;
+    document.getElementById("chat").appendChild(div);
+}
+
+function sendMessage(option=null) {
+    let input = document.getElementById("msg");
+    let message = option || input.value;
+
+    if (!message) return;
+
+    addMessage(message, "user");
+    input.value = "";
+
+    fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: message})
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        addMessage(data.text, "bot");
+
+        // OPTIONS BUTTONS
+        if (data.options) {
+            data.options.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.innerText = opt;
+                btn.onclick = () => sendMessage(opt);
+                document.getElementById("chat").appendChild(btn);
+            });
+        }
+
+        // QR IMAGE
+        if (data.qr) {
+            let img = document.createElement("img");
+            img.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=payment";
+            img.style.display = "block";
+            img.style.margin = "10px auto";
+            document.getElementById("chat").appendChild(img);
+        }
+
+        // DOWNLOAD RECEIPT
+        if (data.download) {
+            let link = document.createElement("a");
+            link.href = "http://127.0.0.1:5000" + data.download;
+            link.innerText = "📥 Download Receipt";
+            link.style.display = "block";
+            link.style.color = "lightgreen";
+            document.getElementById("chat").appendChild(link);
+        }
+
+        document.getElementById("chat").scrollTop =
+            document.getElementById("chat").scrollHeight;
+    });
+}
+
+</script>
+
+</body>
+</html>
